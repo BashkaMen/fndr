@@ -1,0 +1,86 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Fndr.ViewModels"
+        xmlns:s="using:Fndr.Services"
+        x:Class="Fndr.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="fndr" Width="960" Height="600"
+        FontFamily="Maple Mono NF,Consolas"
+        Background="#202124">
+  <Window.Styles>
+    <Style Selector="Button.nav">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="8,4" />
+      <Setter Property="FontSize" Value="16" />
+    </Style>
+    <Style Selector="Button.place">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="#e8eaed" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Padding" Value="12,6" />
+    </Style>
+    <Style Selector="Button.place:pointerover"><Setter Property="Background" Value="#3b4045" /></Style>
+    <Style Selector="Button.topnav">
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="8,4" />
+      <Setter Property="FontSize" Value="16" />
+    </Style>
+    <Style Selector="Button.topnav:pointerover"><Setter Property="Background" Value="#3b4045" /></Style>
+  </Window.Styles>
+
+  <Grid ColumnDefinitions="200,*">
+    <Border Grid.Column="0" Background="#26282b" Padding="8,12">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Места" Foreground="#e8eaed" FontWeight="Bold" Margin="12,4,0,8" Opacity="0.6" />
+        <Button Classes="place" Content="⌂  Домой" Click="OnHome" />
+        <Button Classes="place" Content="☰  Документы" Click="OnDocs" />
+        <Button Classes="place" Content="↓  Загрузки" Click="OnDownloads" />
+        <Button Classes="place" Content="♪  Музыка" Click="OnMusic" />
+        <Button Classes="place" Content="▣  Картинки" Click="OnPictures" />
+        <Button Classes="place" Content="▶  Видео" Click="OnVideos" />
+      </StackPanel>
+    </Border>
+
+    <DockPanel Grid.Column="1">
+      <Border DockPanel.Dock="Top" Classes="topbar" Background="#2b2f34" Padding="8,6">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <StackPanel Orientation="Horizontal" Spacing="2">
+            <Button Classes="topnav" Content="‹" Click="OnBack" />
+            <Button Classes="topnav" Content="↑" Click="OnUp" />
+          </StackPanel>
+          <TextBox Grid.Column="1" Text="{Binding Path, Mode=OneWay}" KeyDown="OnPathKey"
+                   Background="#3b4045" Foreground="White" CaretBrush="White"
+                   BorderThickness="0" CornerRadius="6" Padding="10,6" Margin="8,0" />
+          <CheckBox Grid.Column="2" Content="скрытые"
+                    Foreground="White"
+                    IsChecked="{Binding ShowHidden}" VerticalAlignment="Center" IsCheckedChanged="OnHidden" />
+        </Grid>
+      </Border>
+      <TextBlock DockPanel.Dock="Bottom" Text="{Binding Status}" Foreground="White" Margin="12,4" Opacity="0.5" FontSize="12" />
+      <ListBox ItemsSource="{Binding Entries}" Background="#202124"
+               DoubleTapped="OnOpen" KeyDown="OnListKey">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem"><Setter Property="Padding" Value="0" /></Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="s:Entry">
+            <Grid ColumnDefinitions="Auto,*,90,150" Margin="12,3">
+              <TextBlock Text="{Binding Glyph}" FontFamily="Segoe UI Emoji,Apple Color Emoji" Width="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#e8eaed" MinWidth="0"
+                         TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2" Text="{Binding SizeText}" Foreground="#e8eaed" Opacity="0.6"
+                         HorizontalAlignment="Right" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="3" Text="{Binding ModifiedText}" Foreground="#e8eaed" Opacity="0.6"
+                         HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+  </Grid>
+</Window>
