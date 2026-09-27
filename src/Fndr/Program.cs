@@ -10,6 +10,7 @@ var start = args.Length > 0 ? args[0] : Environment.GetFolderPath(Environment.Sp
 
 var services = new ServiceCollection()
     .AddSingleton<IFileSystem, FileSystem>()
+    .AddSingleton<ILauncher, ShellLauncher>()
     .AddSingleton(new StartDir(start))
     .AddSingleton<MainViewModel>()
     .BuildServiceProvider();

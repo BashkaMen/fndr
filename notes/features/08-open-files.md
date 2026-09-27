@@ -9,8 +9,13 @@
 
 ## Как устроено
 
-- `MainViewModel.Enter(entry)`: папка → `Open`, файл →
-  `Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })`.
+- `MainViewModel.Enter(entry)`: папка → `Open`, файл → `ILauncher.Open(path)`,
+  ошибка → статус через `OnError`.
+- `ShellLauncher`: `Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })`,
+  возвращает `Result<Unit, LaunchError>`:
+  `NotFound` (файла уже нет) → «файл не найден»,
+  `Failed` (`Win32Exception` — нет ассоциации и т.п.) → «не открылось: …».
+- VM процессы не трогает — в тестах подставляется фейковый `ILauncher`.
 - На Linux `UseShellExecute` идёт через `xdg-open`, на macOS — `open`.
 
 ## Ограничения

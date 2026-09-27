@@ -14,12 +14,26 @@
 
 ## Как устроено
 
-- `MainViewModel.Open(dir)`: `Path.GetFullPath(dir, Path)` → `Directory.Exists`
-  → `TryList` → push в back-stack (если папка другая) → `Apply`.
+- `MainViewModel.Open(dir)`: `_fs.ResolveDir(dir, Path)` → `.Bind(_fs.List)`
+  → `.Match`: успех — push в back-stack (если папка другая) и `Apply`,
+  ошибка — `Describe(FsError)` в статус.
 - `Open` текущей папки = перечитывание, в историю не пишется.
 - `Up` — через `IFileSystem.Parent`.
-- `TryList` ловит `UnauthorizedAccessException` / `IOException`, текущая
+- Ошибки — `Result<T, FsError>` вместо исключений (см. «Ошибки» ниже), текущая
   папка при ошибке не меняется.
+
+## Ошибки
+
+`Result<T, E>` (`src/Fndr/Result.cs`) — Dunet-юнион `Ok(Value)` / `Error(Value)`
+с `Match`, плюс `Map`, `Bind`, `OnError`. Исключения ловятся только внутри
+сервисов и превращаются в типизированные ошибки:
+
+| `FsError` | Когда | Статус |
+|---|---|---|
+| `InvalidPath` | путь не парсится (пустой, `\0`, слишком длинный) | нет такой папки |
+| `NotFound` | папки нет | нет такой папки |
+| `AccessDenied` | `UnauthorizedAccessException` | нет доступа |
+| `Unavailable` | прочий `IOException` | папка недоступна |
 
 ## Ограничения
 

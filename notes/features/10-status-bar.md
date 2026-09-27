@@ -29,7 +29,7 @@
   сверху) → `Grid ColumnDefinitions="*,Auto"`, общий стиль текста в
   `Grid.Styles` (белый, `Opacity 0.6`, `FontSize 12`).
 - VM: `Status` и `Selection` — строки с уведомлением (`field` + `Set`).
-- `Status` пишут `Open`, `Enter`, `TryList`, `ShowEntries`.
+- `Status` пишут `ShowEntries` и ошибки (`Describe(FsError)` / `Describe(LaunchError)`).
 - `Selection`: `ListBox.SelectionChanged` → `MainViewModel.Select(entries)`.
 - Склонения — `Plural(n, one, few, many)` в VM, размер — `Entry.FormatSize`.
 

@@ -13,7 +13,8 @@
 ## Как устроено
 
 - `Program.cs`: top-level statements, DI-контейнер
-  (`IFileSystem` → `FileSystem`, `StartDir`, `MainViewModel` — синглтоны).
+  (`IFileSystem` → `FileSystem`, `ILauncher` → `ShellLauncher`, `StartDir`,
+  `MainViewModel` — синглтоны).
 - Стартовый путь обёрнут в `record StartDir(string Path)` и внедряется в VM.
 - `ClassicDesktopStyleApplicationLifetime` создаётся вручную,
   `ShutdownMode.OnLastWindowClose`.

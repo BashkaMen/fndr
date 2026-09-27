@@ -18,6 +18,7 @@
 - Paste: `dest = Path.Combine(Path, Path.GetFileName(Path.TrimEndingDirectorySeparator(src)))`.
   Без trim путь со слэшем на конце даёт пустое имя → `dest` = текущая папка.
   - cut → Move, иначе Copy (в `IFileSystem` методы `Copy` / `Move`,
+    возвращают `Result<Unit, FsError>`, новые ошибки — вариантами `FsError`,
     папка — рекурсивно, `Directory.CreateDirectory` + дети).
   - Коллизия: не перезаписывать (потеря данных) — `имя (1).ext`, `папка (1)`.
   - Файл мог исчезнуть после Ctrl+C: проверять существование, пропускать,
@@ -31,9 +32,9 @@
     (`File.Move` между дисками умеет сам.)
   - Рекурсивное копирование: junction/симлинки не обходить
     (`FileAttributes.ReparsePoint`) — могут зациклиться.
-  - `UnauthorizedAccessException` → в Status (паттерн как в `TryList`).
+  - Ошибки — не исключениями: `FsError.AccessDenied` и т.п. → `Describe` → Status.
   - После paste — перечитать текущую папку. `Open(Path)` в back-stack **не**
-    пушит (проверка `Path != dir`), но чище завести `Refresh()` = `TryList` + `Apply`.
+    пушит (проверка `Path != dir`), но чище завести `Refresh()` = `_fs.List` + `Apply`.
   - Выделить вставленное: в VM нет состояния выделения → вернуть имена в
     code-behind или биндить `SelectedItems`. `Entry` — record, поиск по значению работает.
 - Большой файл: пока синхронный `File.Copy`; потом `CopyToAsync` по чанкам

@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Fndr.Services;
 using IOPath = System.IO.Path;
@@ -14,13 +13,15 @@ public record StartDir(string Path);
 public class MainViewModel : INotifyPropertyChanged
 {
     private readonly IFileSystem _fs;
+    private readonly ILauncher _launcher;
     private readonly Stack<string> _back = new();
     private readonly Stack<string> _forward = new();
     private IReadOnlyList<Entry> _all = [];
 
-    public MainViewModel(IFileSystem fs, StartDir start)
+    public MainViewModel(IFileSystem fs, ILauncher launcher, StartDir start)
     {
         _fs = fs;
+        _launcher = launcher;
         Open(start.Path);
         if (Path.Length > 0) return;
 
@@ -63,20 +64,10 @@ public class MainViewModel : INotifyPropertyChanged
         new("▶  Видео", Folder(Environment.SpecialFolder.MyVideos)),
     ];
 
-    public void Open(string dir)
-    {
-        if (FullPath(dir) is not { } full || !_fs.Exists(full)) { Status = "нет такой папки"; return; }
-        dir = full;
-        if (!TryList(dir, out var items)) return;
-
-        if (Path.Length > 0 && Path != dir)
-        {
-            _back.Push(Path);
-            _forward.Clear();
-        }
-
-        Apply(dir, items);
-    }
+    public void Open(string dir) =>
+        _fs.ResolveDir(dir, Path.Length > 0 ? Path : null)
+            .Bind(full => _fs.List(full, ShowHidden).Map(items => (Dir: full, Items: items)))
+            .Match(ok => GoTo(ok.Value.Dir, ok.Value.Items), error => Status = Describe(error.Value));
 
     public void Enter(Entry? e)
     {
@@ -85,8 +76,7 @@ public class MainViewModel : INotifyPropertyChanged
         var full = IOPath.Combine(Path, e.Name);
         if (e.IsDir) { Open(full); return; }
 
-        try { Process.Start(new ProcessStartInfo(full) { UseShellExecute = true }); }
-        catch (Exception ex) { Status = $"не открылось: {ex.Message}"; }
+        _launcher.Open(full).OnError(error => Status = Describe(error));
     }
 
     public void Select(IReadOnlyCollection<Entry> selected)
@@ -115,33 +105,42 @@ public class MainViewModel : INotifyPropertyChanged
     {
         while (from.TryPop(out var dir))
         {
-            if (!_fs.Exists(dir) || !TryList(dir, out var items)) continue;
-            to.Push(Path);
-            Apply(dir, items);
-            return;
+            var moved = _fs.List(dir, ShowHidden).Match(
+                ok =>
+                {
+                    to.Push(Path);
+                    Apply(dir, ok.Value);
+                    return true;
+                },
+                error =>
+                {
+                    Status = Describe(error.Value);
+                    return false;
+                });
+            if (moved) return;
         }
     }
 
-    private string? FullPath(string dir)
+    private void GoTo(string dir, IReadOnlyList<Entry> items)
     {
-        try { return Path.Length > 0 ? IOPath.GetFullPath(dir, Path) : IOPath.GetFullPath(dir); }
-        catch (ArgumentException) { return null; }
+        if (Path.Length > 0 && Path != dir)
+        {
+            _back.Push(Path);
+            _forward.Clear();
+        }
+
+        Apply(dir, items);
     }
 
-    private bool TryList(string dir, out IReadOnlyList<Entry> items)
-    {
-        try
-        {
-            items = _fs.List(dir, ShowHidden);
-            return true;
-        }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
-        {
-            items = [];
-            Status = ex is UnauthorizedAccessException ? "нет доступа" : "папка недоступна";
-            return false;
-        }
-    }
+    private static string Describe(FsError error) => error.Match(
+        invalidPath => "нет такой папки",
+        notFound => "нет такой папки",
+        accessDenied => "нет доступа",
+        unavailable => "папка недоступна");
+
+    private static string Describe(LaunchError error) => error.Match(
+        notFound => "файл не найден",
+        failed => $"не открылось: {failed.Message}");
 
     private void Apply(string dir, IReadOnlyList<Entry> items)
     {
