@@ -65,7 +65,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     public void Open(string dir)
     {
-        if (FullPath(dir) is not { } full || !Directory.Exists(full)) { Status = "нет такой папки"; return; }
+        if (FullPath(dir) is not { } full || !_fs.Exists(full)) { Status = "нет такой папки"; return; }
         dir = full;
         if (!TryList(dir, out var items)) return;
 
@@ -115,7 +115,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         while (from.TryPop(out var dir))
         {
-            if (!Directory.Exists(dir) || !TryList(dir, out var items)) continue;
+            if (!_fs.Exists(dir) || !TryList(dir, out var items)) continue;
             to.Push(Path);
             Apply(dir, items);
             return;

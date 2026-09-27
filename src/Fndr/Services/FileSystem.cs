@@ -21,6 +21,7 @@ public interface IFileSystem
 {
     IReadOnlyList<Entry> List(string dir, bool hidden = false);
     string? Parent(string dir);
+    bool Exists(string dir);
 }
 
 public class FileSystem : IFileSystem
@@ -36,4 +37,6 @@ public class FileSystem : IFileSystem
             .ToList();
 
     public string? Parent(string dir) => Directory.GetParent(dir)?.FullName;
+
+    public bool Exists(string dir) => Directory.Exists(dir);
 }
