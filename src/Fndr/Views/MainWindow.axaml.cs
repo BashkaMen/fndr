@@ -39,6 +39,9 @@ public partial class MainWindow : Window
 
     private void OnOpen(object? sender, TappedEventArgs e) => _vm.Enter((sender as ListBox)?.SelectedItem as Entry);
 
+    private void OnSelectionChanged(object? sender, SelectionChangedEventArgs e) =>
+        _vm.Select((sender as ListBox)?.SelectedItems?.OfType<Entry>().ToList() ?? []);
+
     private void OnListKey(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Back) _vm.Up();

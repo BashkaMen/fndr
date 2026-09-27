@@ -27,6 +27,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     public string Path { get; private set => Set(ref field, value); } = "";
     public string Status { get; private set => Set(ref field, value); } = "";
+    public string Selection { get; private set => Set(ref field, value); } = "";
     public ObservableCollection<Entry> Entries { get; } = [];
 
     public bool ShowHidden
@@ -71,6 +72,17 @@ public class MainViewModel : INotifyPropertyChanged
         catch (Exception ex) { Status = $"не открылось: {ex.Message}"; }
     }
 
+    public void Select(IReadOnlyCollection<Entry> selected)
+    {
+        var files = selected.Where(e => !e.IsDir).ToList();
+        Selection = (selected.Count, files.Count) switch
+        {
+            (0, _) => "",
+            (var n, 0) => $"Выделено: {n}",
+            var (n, _) => $"Выделено: {n} ({Entry.FormatSize(files.Sum(e => e.Size))})",
+        };
+    }
+
     public void Back() => Navigate(_back, _forward);
     public void Forward() => Navigate(_forward, _back);
 
@@ -110,8 +122,17 @@ public class MainViewModel : INotifyPropertyChanged
         Path = dir;
         Entries.Clear();
         foreach (var e in items) Entries.Add(e);
-        Status = $"Итого файлов: {items.Count(e => !e.IsDir)}";
+        var dirs = items.Count(e => e.IsDir);
+        var files = items.Count - dirs;
+        Status = $"Итого: {Plural(dirs, "папка", "папки", "папок")}, {Plural(files, "файл", "файла", "файлов")}";
     }
+
+    private static string Plural(int n, string one, string few, string many) => (n % 10, n % 100) switch
+    {
+        (1, not 11) => $"{n} {one}",
+        (>= 2 and <= 4, < 12 or > 14) => $"{n} {few}",
+        _ => $"{n} {many}",
+    };
 
     private static string Folder(Environment.SpecialFolder folder) => Environment.GetFolderPath(folder);
 

@@ -60,9 +60,21 @@
                     IsChecked="{Binding ShowHidden}" VerticalAlignment="Center" />
         </Grid>
       </Border>
-      <TextBlock DockPanel.Dock="Bottom" Text="{Binding Status}" Foreground="White" Margin="12,4" Opacity="0.5" FontSize="12" />
+      <Border DockPanel.Dock="Bottom" Background="#2b2f34" BorderBrush="#3b4045" BorderThickness="0,1,0,0" Padding="12,4">
+        <Grid ColumnDefinitions="*,Auto">
+          <Grid.Styles>
+            <Style Selector="TextBlock">
+              <Setter Property="Foreground" Value="White" />
+              <Setter Property="Opacity" Value="0.6" />
+              <Setter Property="FontSize" Value="12" />
+            </Style>
+          </Grid.Styles>
+          <TextBlock Text="{Binding Status}" />
+          <TextBlock Grid.Column="1" Text="{Binding Selection}" />
+        </Grid>
+      </Border>
       <ListBox ItemsSource="{Binding Entries}" SelectionMode="Multiple" Background="#202124"
-               DoubleTapped="OnOpen" KeyDown="OnListKey">
+               DoubleTapped="OnOpen" KeyDown="OnListKey" SelectionChanged="OnSelectionChanged">
         <ListBox.Styles>
           <Style Selector="ListBoxItem"><Setter Property="Padding" Value="0" /></Style>
           <Style Selector="ListBoxItem TextBlock">

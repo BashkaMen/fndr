@@ -6,7 +6,7 @@ public record Entry(string Name, bool IsDir, long Size, DateTime Modified)
     public string SizeText => IsDir ? "" : FormatSize(Size);
     public string ModifiedText => Modified.ToString("yyyy-MM-dd HH:mm");
 
-    private static string FormatSize(long bytes)
+    public static string FormatSize(long bytes)
     {
         if (bytes < 1024) return $"{bytes} Б";
         string[] units = ["КБ", "МБ", "ГБ", "ТБ"];
