@@ -14,7 +14,11 @@ public partial class MainWindow : Window
     {
         DataContext = _vm = vm;
         InitializeComponent();
+        AddHandler(KeyDownEvent, OnWindowKey, RoutingStrategies.Tunnel);
     }
+
+    private KeyModifiers CommandModifiers =>
+        Avalonia.Application.Current?.PlatformSettings?.HotkeyConfiguration.CommandModifiers ?? KeyModifiers.Control;
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
@@ -38,6 +42,32 @@ public partial class MainWindow : Window
     }
 
     private void OnOpen(object? sender, TappedEventArgs e) => _vm.Enter((sender as ListBox)?.SelectedItem as Entry);
+
+    private void OnWindowKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.F || e.KeyModifiers != CommandModifiers) return;
+        e.Handled = true;
+        _vm.ToggleSearch();
+        if (_vm.IsSearchVisible) SearchBox.Focus();
+        else List.Focus();
+    }
+
+    private void OnSearchKey(object? sender, KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Escape:
+                _vm.HideSearch();
+                List.Focus();
+                e.Handled = true;
+                break;
+            case Key.Enter or Key.Down when _vm.Entries.Count > 0:
+                List.SelectedIndex = 0;
+                List.ContainerFromIndex(0)?.Focus();
+                e.Handled = true;
+                break;
+        }
+    }
 
     private void OnSelectionChanged(object? sender, SelectionChangedEventArgs e) =>
         _vm.Select((sender as ListBox)?.SelectedItems?.OfType<Entry>().ToList() ?? []);

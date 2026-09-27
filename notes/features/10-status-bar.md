@@ -11,6 +11,7 @@
 | Когда | Текст |
 |---|---|
 | Папка открыта / перечитана | `Итого: 5 папок, 12 файлов` (с русскими склонениями) |
+| Активен поиск (Ctrl+F) | `Найдено N из M` (см. [09-search.md](09-search.md)) |
 | Путь не существует | `нет такой папки` |
 | Нет прав на папку | `нет доступа` |
 | Другая ошибка чтения (`IOException`) | `папка недоступна` |
@@ -28,7 +29,7 @@
   сверху) → `Grid ColumnDefinitions="*,Auto"`, общий стиль текста в
   `Grid.Styles` (белый, `Opacity 0.6`, `FontSize 12`).
 - VM: `Status` и `Selection` — строки с уведомлением (`field` + `Set`).
-- `Status` пишут `Open`, `Enter`, `TryList`, `Apply`.
+- `Status` пишут `Open`, `Enter`, `TryList`, `ShowEntries`.
 - `Selection`: `ListBox.SelectionChanged` → `MainViewModel.Select(entries)`.
 - Склонения — `Plural(n, one, few, many)` в VM, размер — `Entry.FormatSize`.
 
@@ -42,5 +43,4 @@
 ## Идеи
 
 - Ошибки — красным и с автосбросом через несколько секунд обратно на «Итого».
-- Место для прогресса copy-paste (см. [01-copy-paste-dnd.md](01-copy-paste-dnd.md))
-  и счётчика поиска `Найдено N из M` (см. [09-search.md](09-search.md)).
+- Место для прогресса copy-paste (см. [01-copy-paste-dnd.md](01-copy-paste-dnd.md)).

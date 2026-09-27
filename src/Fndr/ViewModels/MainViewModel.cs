@@ -16,6 +16,7 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly IFileSystem _fs;
     private readonly Stack<string> _back = new();
     private readonly Stack<string> _forward = new();
+    private IReadOnlyList<Entry> _all = [];
 
     public MainViewModel(IFileSystem fs, StartDir start)
     {
@@ -35,6 +36,18 @@ public class MainViewModel : INotifyPropertyChanged
         get;
         set { if (Set(ref field, value)) Open(Path); }
     }
+
+    public bool IsSearchVisible
+    {
+        get;
+        private set { if (Set(ref field, value) && !value) Filter = ""; }
+    }
+
+    public string Filter
+    {
+        get;
+        set { if (Set(ref field, value ?? "")) ShowEntries(); }
+    } = "";
 
     public IReadOnlyList<Place> Places { get; } =
     [
@@ -83,6 +96,9 @@ public class MainViewModel : INotifyPropertyChanged
         };
     }
 
+    public void ToggleSearch() => IsSearchVisible = !IsSearchVisible;
+    public void HideSearch() => IsSearchVisible = false;
+
     public void Back() => Navigate(_back, _forward);
     public void Forward() => Navigate(_forward, _back);
 
@@ -119,11 +135,25 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void Apply(string dir, IReadOnlyList<Entry> items)
     {
+        _all = items;
+        if (dir != Path) HideSearch();
         Path = dir;
+        ShowEntries();
+    }
+
+    private void ShowEntries()
+    {
         Entries.Clear();
-        foreach (var e in items) Entries.Add(e);
-        var dirs = items.Count(e => e.IsDir);
-        var files = items.Count - dirs;
+        foreach (var e in _all.Where(e => e.Name.Contains(Filter, StringComparison.OrdinalIgnoreCase))) Entries.Add(e);
+
+        if (Filter.Length > 0)
+        {
+            Status = $"Найдено {Entries.Count} из {_all.Count}";
+            return;
+        }
+
+        var dirs = _all.Count(e => e.IsDir);
+        var files = _all.Count - dirs;
         Status = $"Итого: {Plural(dirs, "папка", "папки", "папок")}, {Plural(files, "файл", "файла", "файлов")}";
     }
 
