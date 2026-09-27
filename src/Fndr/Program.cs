@@ -10,7 +10,8 @@ var start = args.Length > 0 ? Path.GetFullPath(args[0]) : Environment.GetFolderP
 
 var services = new ServiceCollection()
     .AddSingleton<IFileSystem, FileSystem>()
-    .AddTransient(_ => new MainViewModel(_.GetRequiredService<IFileSystem>(), start))
+    .AddSingleton(new StartDir(start))
+    .AddSingleton<MainViewModel>()
     .BuildServiceProvider();
 
 var life = new ClassicDesktopStyleApplicationLifetime { Args = args, ShutdownMode = ShutdownMode.OnLastWindowClose };
