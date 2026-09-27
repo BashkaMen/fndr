@@ -131,7 +131,7 @@ Copy/Move выбирает цель (в Explorer: Ctrl — копировать,
 
 ## Порядок доставки (когда решим делать)
 
-0. `[STAThread]` в `Program.cs`; `Refresh()` в VM; фикс DoubleTapped (см. ../bugs.md).
+0. `[STAThread]` в `Program.cs`; `Refresh()` в VM.
 1. Внутренний буфер + Ctrl+C/X/V (ядро + коллизии + refresh).
 2. Приём drop'а из Explorer.
 3. Запись в OS-буфер (+ чтение извне в Paste).

@@ -6,7 +6,7 @@ using Fndr.ViewModels;
 using Fndr.Views;
 using Microsoft.Extensions.DependencyInjection;
 
-var start = args.Length > 0 ? Path.GetFullPath(args[0]) : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+var start = args.Length > 0 ? args[0] : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
 var services = new ServiceCollection()
     .AddSingleton<IFileSystem, FileSystem>()

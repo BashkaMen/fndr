@@ -22,6 +22,10 @@ public class MainViewModel : INotifyPropertyChanged
     {
         _fs = fs;
         Open(start.Path);
+        if (Path.Length > 0) return;
+
+        Open(Folder(Environment.SpecialFolder.UserProfile));
+        if (Path.Length > 0) Status = $"нет такой папки: {start.Path}, открыта домашняя";
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -61,8 +65,8 @@ public class MainViewModel : INotifyPropertyChanged
 
     public void Open(string dir)
     {
-        dir = Path.Length > 0 ? IOPath.GetFullPath(dir, Path) : IOPath.GetFullPath(dir);
-        if (!Directory.Exists(dir)) { Status = "нет такой папки"; return; }
+        if (FullPath(dir) is not { } full || !Directory.Exists(full)) { Status = "нет такой папки"; return; }
+        dir = full;
         if (!TryList(dir, out var items)) return;
 
         if (Path.Length > 0 && Path != dir)
@@ -104,18 +108,24 @@ public class MainViewModel : INotifyPropertyChanged
 
     public void Up()
     {
-        if (_fs.Parent(Path) is { } parent) Open(parent);
+        if (Path.Length > 0 && _fs.Parent(Path) is { } parent) Open(parent);
     }
 
     private void Navigate(Stack<string> from, Stack<string> to)
     {
-        while (from.TryPop(out var dir) && Directory.Exists(dir))
+        while (from.TryPop(out var dir))
         {
-            if (!TryList(dir, out var items)) continue;
+            if (!Directory.Exists(dir) || !TryList(dir, out var items)) continue;
             to.Push(Path);
             Apply(dir, items);
             return;
         }
+    }
+
+    private string? FullPath(string dir)
+    {
+        try { return Path.Length > 0 ? IOPath.GetFullPath(dir, Path) : IOPath.GetFullPath(dir); }
+        catch (ArgumentException) { return null; }
     }
 
     private bool TryList(string dir, out IReadOnlyList<Entry> items)

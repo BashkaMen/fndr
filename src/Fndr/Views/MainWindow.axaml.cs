@@ -41,7 +41,7 @@ public partial class MainWindow : Window
         if (e.Key == Key.Enter && sender is TextBox box) _vm.Open(box.Text ?? "");
     }
 
-    private void OnOpen(object? sender, TappedEventArgs e) => _vm.Enter((sender as ListBox)?.SelectedItem as Entry);
+    private void OnOpen(object? sender, TappedEventArgs e) => _vm.Enter((e.Source as Control)?.DataContext as Entry);
 
     private void OnWindowKey(object? sender, KeyEventArgs e)
     {
